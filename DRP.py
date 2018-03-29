@@ -34,7 +34,6 @@ def inverse(a, n):
 
 def findDiscreteLog(a, B, p):
     primes = prime_factors(p - 1)
-    print(primes)
     CRT_dict = {}
     for prime, power in primes.items():
         exp = 1
@@ -44,19 +43,17 @@ def findDiscreteLog(a, B, p):
             q = int((p - 1) / pow(prime, exp))
             Bpow = pow(B_sub, q, p)
             apow = pow(a, int((p - 1) / prime), p)
-            print('Bpow: '+str(Bpow)+ ' B_sub: '+str(B_sub))
             k = 0
             found = False
             while not found:
-                #print('k: ' +str(k)+' pow: '+str(pow(apow, k ,p)))
                 if pow(apow, k, p) == Bpow:
                     x_list.append(k)
                     # Note that this only checks up to q - 1
                     found = True
                 if not found:
                     k = k + 1
+            B_sub = (B_sub * pow(inverse(a, p), k * pow(prime, exp - 1))) % p
             exp = exp + 1
-            B_sub = (B_sub * pow(inverse(a, p), k)) % p
         exp = 0
         ans_mod_prime = 0
         while exp < power:
@@ -96,6 +93,8 @@ if __name__ == '__main__':
     print('2: '+ str(findDiscreteLog(3, 24, 31))) # problem 2
     print('3a: '+ str(findDiscreteLog(2, 3925, 3989))) # problem 3
     print('3a: '+ str(findDiscreteLog(2, 1046, 3989))) # problem 3
-    print('3b: '+ str(findDiscreteLog(2, (3925 * 1046) % 3989, 3989))) # problem 3
-    print(findDiscreteLog(11, 2, 601))
+    print('3b: '+ str(findDiscreteLog(2, (3925 * 1046) % 3989, 3989))) # pr 3
     print('4: '+ str(findDiscreteLog(11, 2, 1201))) # problem 4
+
+
+
