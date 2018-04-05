@@ -61,6 +61,20 @@ class Elliptic_Curve:
             y_3 = ((m * (pt1.x - x_3)) - pt1.y) % self.p
             return Point(x_3, y_3)
 
+    # Pohlig-Hellman analog
+    def pohlig_hellman(self, A, B):
+        if not self.is_point(A) or not self.is_point(B):
+            raise ValueError('The points are not valid.')
+        # First, find smallest integer n so that nA = inf
+        n = 1
+        while True:
+            A_aux = A
+            if A_aux.is_inf:
+                break
+            A_aux = add(A, A_aux)
+            n = n + 1
+        ######## This is where I made it to
+    
     # Check a k value by returning point B s.t. B = kA
     def check_discrete_log_ans(self, k, A):
         original_A, ans, i = Point(A.x, A.y, A.is_inf), A, 0
@@ -82,7 +96,6 @@ class Point:
             return 'inf'
         else:
             return '(' + str(self.x) + ', ' + str(self.y) + ')'
-        
 
 if __name__ == '__main__':
     # Working on regular elliptic curve
