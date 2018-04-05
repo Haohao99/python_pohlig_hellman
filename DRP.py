@@ -38,6 +38,7 @@ def inverse(a, n):
         t = t + n
     return t
 
+# Pohlig-Hellman attack
 def findDiscreteLog(a, B, p):
     primes = prime_factors(p - 1)
     CRT_dict = {}
