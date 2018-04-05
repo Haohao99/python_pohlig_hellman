@@ -1,5 +1,11 @@
 import timeit
 
+######################################################################
+# Matt Watson
+# Directed Reading Program Project
+# Discrete Log functions
+######################################################################
+
 def showDiscreteLog(p, a):
     print('p: ' + str(p))
     print('a: ' + str(a))
