@@ -100,6 +100,7 @@ class Elliptic_Curve:
         original_A, ans, i = Point(A.x, A.y, A.is_inf), A, 1
         while i < k:
             ans = self.add(ans, original_A)
+            print('ans: '+ str(ans))
             i = i + 1
         return ans
     
@@ -181,9 +182,10 @@ if __name__ == '__main__':
     CRT_dict[2] = 5
     print(DRP.CRT(CRT_dict))
     # The answer is incorrect and the above code has proven nothing
-    
-    ec = Elliptic_Curve(-10,21,557) # prime p is important (19)
-    print(ec.check_discrete_log_ans(63, Point(2,3)))
+
+    ec = Elliptic_Curve(2,3,19) # prime p is important (19)
+    print('begin')
+    print(ec.check_discrete_log_ans(4, Point(1,5)))
     print('here')
     print(ec.find_n(Point(1,5)))
     print(ec.pohlig_hellman(Point(1,5),Point(10,7))) # Should equal 4
