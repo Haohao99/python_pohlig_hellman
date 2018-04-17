@@ -82,13 +82,15 @@ class Elliptic_Curve:
             CRT_dict[k] = prime
         return DRP.CRT(CRT_dict)
 
+    # smallest int st nA = inf
     def find_n(self, A):
         n = 1
         A_aux = A
         while True:
             if A_aux.is_inf:
                 break
-            A_aux = self.add(A, A_aux)
+            A_aux = self.add(A_aux, A)
+            print(A_aux)
             n = n + 1
         return n
             
@@ -178,9 +180,13 @@ if __name__ == '__main__':
     CRT_dict[0] = 3
     CRT_dict[2] = 5
     print(DRP.CRT(CRT_dict))
-
     # The answer is incorrect and the above code has proven nothing
-    print(ec.pohlig_hellman(Point(2,7),Point(7,8))) # Should equal 3
+    
+    ec = Elliptic_Curve(-10,21,557) # prime p is important (19)
+    print(ec.check_discrete_log_ans(63, Point(2,3)))
+    print('here')
+    print(ec.find_n(Point(1,5)))
+    print(ec.pohlig_hellman(Point(1,5),Point(10,7))) # Should equal 4
     
 
 
