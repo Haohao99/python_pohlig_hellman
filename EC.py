@@ -66,20 +66,39 @@ class Elliptic_Curve:
         if not self.is_point(A) or not self.is_point(B):
             raise ValueError('The points are not valid.')
         # First, find smallest integer n so that nA = inf
+        self.find_n(A)
+        # Next, Pohlig-Hellman analog
+        primes = DRP.prime_factors(n)
+        CRT_dict = {}
+        for prime, power in primes.items():
+            A_modp = A.point_mod(prime)
+            B_modp = B.point_mod(prime)
+            k = 1
+            while True:
+                if A_modp.equals(B_modp):
+                    break
+                A_modp = self.add(A_modp, A_modp)
+                k = k + 1
+            CRT_dict[k] = prime
+        return DRP.CRT(CRT_dict)
+
+    def find_n(self, A):
         n = 1
+        A_aux = A
         while True:
-            A_aux = A
             if A_aux.is_inf:
                 break
-            A_aux = add(A, A_aux)
+            A_aux = self.add(A, A_aux)
             n = n + 1
-        ######## This is where I made it to
+        return n
+            
     
     # Check a k value by returning point B s.t. B = kA
     def check_discrete_log_ans(self, k, A):
-        original_A, ans, i = Point(A.x, A.y, A.is_inf), A, 0
+        original_A, ans, i = Point(A.x, A.y, A.is_inf), A, 1
         while i < k:
-            ans = self.add(ans, A)
+            ans = self.add(ans, original_A)
+            i = i + 1
         return ans
     
 # Class for a point. Supports infinity
@@ -90,6 +109,12 @@ class Point:
         self.is_inf = is_infinity
         if is_infinity:
             self.coordinate = None
+
+    def point_mod(self, new_mod):
+        return Point(self.x % new_mod, self.y % new_mod, self.is_inf)
+
+    def equals(pt):
+        return self.x == pt.x and self.y == pt.y and self.is_inf == pt.is_inf
     
     def __str__(self):
         if self.is_inf:
@@ -127,6 +152,35 @@ if __name__ == '__main__':
     pt = Point(1, 3)
     print(ec_mod.add(pt, pt))
 
+    # My test
+    ec = Elliptic_Curve(2, 7, 15)
+    pt1 = Point(2, 7)
+    print(ec.is_point(pt1))
+    ans = ec.add(pt1, ec.add(pt1, pt1))
+    print(ans)
+    ec3 = Elliptic_Curve(2, 7, 3)
+    pt1_3 = pt1.point_mod(3)
+    print(ec3.is_point(pt1_3))
+    ans_3 = ans.point_mod(3)
+    print(ec3.is_point(ans_3))
+    ec5 = Elliptic_Curve(2, 7, 5)
+    pt1_5 = pt1.point_mod(5)
+    print(ec5.is_point(pt1_5))
+    ans_5 = ans.point_mod(5)
+    print(ec5.is_point(ans_5))
+    
+    # So, I can break apart an elliptic curve mod pq into mod p and mod q
+    print(ec3.check_discrete_log_ans(3, pt1_3)) # k_1 = 3
+    print(ec5.check_discrete_log_ans(2, pt1_5)) # k_2 = 2
+
+    
+    CRT_dict = {}
+    CRT_dict[0] = 3
+    CRT_dict[2] = 5
+    print(DRP.CRT(CRT_dict))
+
+    # The answer is incorrect and the above code has proven nothing
+    print(ec.pohlig_hellman(Point(2,7),Point(7,8))) # Should equal 3
     
 
 
