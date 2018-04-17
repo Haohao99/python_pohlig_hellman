@@ -27,6 +27,7 @@ def CRT(dict_mod_num):
 
 def inverse(a, n):
     t = 0
+    a = a % n
     newt = 1
     r = n
     newr = a

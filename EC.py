@@ -26,6 +26,7 @@ class Elliptic_Curve:
     # adds two points on the curve together
     def add(self, pt1, pt2):
         # Check that points are on curve
+        #print('I am adding ' + str(pt1) + str(pt2))
         if not self.is_point(pt1) or not self.is_point(pt2):
             raise ValueError('The points being added are invalid.')
         
@@ -56,7 +57,10 @@ class Elliptic_Curve:
                 m = (m * DRP.inverse((2 * pt1.y), self.p)) % self.p
             else:
                 m = (pt2.y - pt1.y)
+                #print('flag')
+                #print(DRP.inverse((pt2.x - pt1.x), self.p) % self.p)
                 m = (m * DRP.inverse((pt2.x - pt1.x), self.p)) % self.p
+                #print(m)
             x_3 = (pow(m, 2) - pt1.x - pt2.x) % self.p
             y_3 = ((m * (pt1.x - x_3)) - pt1.y) % self.p
             return Point(x_3, y_3)
@@ -184,9 +188,11 @@ if __name__ == '__main__':
     # The answer is incorrect and the above code has proven nothing
 
     ec = Elliptic_Curve(2,3,19) # prime p is important (19)
+    print(ec.add(Point(1,5), Point(12,8)))
     print('begin')
     print(ec.check_discrete_log_ans(4, Point(1,5)))
     print('here')
+    print(DRP.inverse(-11, 19))
     print(ec.find_n(Point(1,5)))
     print(ec.pohlig_hellman(Point(1,5),Point(10,7))) # Should equal 4
     
