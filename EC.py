@@ -37,6 +37,8 @@ class Elliptic_Curve:
             return Point(pt2.x, pt2.y)
         if pt2.is_inf:
             return Point(pt1.x, pt1.y)
+        if pt1.x == pt2.x and pt1.y != pt2.y:
+            return Point(None, None, is_infinity=True)
         
         # Add points otherwise
         if self.p is None:
@@ -177,14 +179,14 @@ if __name__ == '__main__':
     print(ec5.is_point(ans_5))
     
     # So, I can break apart an elliptic curve mod pq into mod p and mod q
-    print(ec3.check_discrete_log_ans(3, pt1_3)) # k_1 = 3
-    print(ec5.check_discrete_log_ans(2, pt1_5)) # k_2 = 2
+    #print(ec3.check_discrete_log_ans(3, pt1_3)) # k_1 = 3
+    #print(ec5.check_discrete_log_ans(2, pt1_5)) # k_2 = 2
 
     
-    CRT_dict = {}
-    CRT_dict[0] = 3
-    CRT_dict[2] = 5
-    print(DRP.CRT(CRT_dict))
+    #CRT_dict = {}
+    #CRT_dict[0] = 3
+    #CRT_dict[2] = 5
+    #print(DRP.CRT(CRT_dict))
     # The answer is incorrect and the above code has proven nothing
 
     ec = Elliptic_Curve(2,3,19) # prime p is important (19)
@@ -195,7 +197,10 @@ if __name__ == '__main__':
     print(DRP.inverse(-11, 19))
     print(ec.find_n(Point(1,5)))
     print(ec.pohlig_hellman(Point(1,5),Point(10,7))) # Should equal 4
-    
+
+    ec = Elliptic_Curve(1,3,5)
+    print(ec.add(Point(4,4), Point(4,1)))
+    print(ec.find_n(Point(4,1)))
 
 
 
