@@ -72,20 +72,35 @@ class Elliptic_Curve:
         if not self.is_point(A) or not self.is_point(B):
             raise ValueError('The points are not valid.')
         # First, find smallest integer n so that nA = inf
-        self.find_n(A)
+        n = self.find_n(A)
         # Next, Pohlig-Hellman analog
         primes = DRP.prime_factors(n)
         CRT_dict = {}
         for prime, power in primes.items():
-            A_modp = A.point_mod(prime)
-            B_modp = B.point_mod(prime)
-            k = 1
-            while True:
-                if A_modp.equals(B_modp):
-                    break
-                A_modp = self.add(A_modp, A_modp)
-                k = k + 1
-            CRT_dict[k] = prime
+            exp = 1
+            x_list = []
+            B_sub = B
+            while exp <= power:
+                q = int(n / pow(prime, exp))
+                Bpow = self.check_discrete_log_ans(q, B_sub)
+                apow = self.check_discrete_log_ans(int(n / prime), A)
+                k = 1
+                found = False
+                while not found:
+                    if self.check_discrete_log_ans(k, apow).equals(Bpow):
+                        x_list.append(k)
+                        found = True
+                    if not found:
+                        k = k + 1
+                if exp != power:
+                    B_sub = self.add(B_sub, self.check_discrete_log_ans(pow(prime, exp-1)*k, self.inverse(A)))
+                exp = exp + 1
+            exp = 0
+            ans_mod_prime = 0
+            while exp < power:
+                ans_mod_prime = ans_mod_prime + (pow(prime, exp) * x_list[exp])
+                exp = exp + 1    
+            CRT_dict[ans_mod_prime % pow(prime, power)] = pow(prime, power)
         return DRP.CRT(CRT_dict)
 
     # smallest int st nA = inf
@@ -96,17 +111,24 @@ class Elliptic_Curve:
             if A_aux.is_inf:
                 break
             A_aux = self.add(A_aux, A)
-            print(A_aux)
             n = n + 1
         return n
+
+    # inverse of point (assume A on curve)
+    def inverse(self, A):
+        if A.x == 0 or A.y == 0:
+            return A
+        else:
+            return Point(A.x, (-A.y % self.p))
             
     
     # Check a k value by returning point B s.t. B = kA
     def check_discrete_log_ans(self, k, A):
+        if k == 0:
+            return Point(None, None, true)
         original_A, ans, i = Point(A.x, A.y, A.is_inf), A, 1
         while i < k:
             ans = self.add(ans, original_A)
-            print('ans: '+ str(ans))
             i = i + 1
         return ans
     
@@ -122,7 +144,7 @@ class Point:
     def point_mod(self, new_mod):
         return Point(self.x % new_mod, self.y % new_mod, self.is_inf)
 
-    def equals(pt):
+    def equals(self, pt):
         return self.x == pt.x and self.y == pt.y and self.is_inf == pt.is_inf
     
     def __str__(self):
@@ -196,11 +218,49 @@ if __name__ == '__main__':
     print('here')
     print(DRP.inverse(-11, 19))
     print(ec.find_n(Point(1,5)))
-    print(ec.pohlig_hellman(Point(1,5),Point(10,7))) # Should equal 4
+    #print(ec.pohlig_hellman(Point(1,5),Point(10,7))) # Should equal 4
 
+    print('Testing find n')
     ec = Elliptic_Curve(1,3,5)
     print(ec.add(Point(4,4), Point(4,1)))
     print(ec.find_n(Point(4,1)))
+    print()
+    
+    print('Sample ec')
+    ec = Elliptic_Curve(4,4,5)
+    print(ec.find_n(Point(4,3)))
+
+    print()
+    print('mod 7 example')
+    ec = Elliptic_Curve(4,4,7)
+    print(ec.find_n(Point(0,2)))
+    print(ec.find_n(Point(0,5)))
+    print(ec.find_n(Point(1,3)))
+    print(ec.find_n(Point(1,4)))
+    print(ec.find_n(Point(3,1))) # n = 10
+    print(ec.find_n(Point(3,6)))
+    print(ec.find_n(Point(4,0)))
+    print(ec.find_n(Point(5,3)))
+    print(ec.find_n(Point(5,4)))
+
+    print()
+    print('mod 7 pohlig hellman')
+    print(ec.check_discrete_log_ans(7, Point(3,1)))
+    # so, 7(3,1) = (0,5)
+    print(ec.check_discrete_log_ans(2, Point(5,3)))
+    print(ec.check_discrete_log_ans(2, Point(3,1)))
+    print(ec.pohlig_hellman(Point(3,1), Point(0,5)))    #answer should be 7
+
+    print()
+    print('Computer Problem 1')
+    ec = Elliptic_Curve(2,3,19)
+    print(ec.pohlig_hellman(Point(1,5), Point(9,3))) # should be 5
+    print(ec.check_discrete_log_ans(5, Point(1,5)))
+
+    # Next need to find a quicker way to find n, because going through all
+    # possible values is what the algorithm is built to avoid.
+    
+    
 
 
 
